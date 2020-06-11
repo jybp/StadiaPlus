@@ -15,6 +15,7 @@ import { StoreFilter } from './components/StoreFilter';
 import { Ratings } from './components/Ratings';
 import { Language } from './Language';
 import { AllowWindowedMode } from './components/AllowWindowedMode';
+import { Record } from './components/Record';
 import { PasteFromClipboard } from './components/PasteFromClipboard';
 import { StorageManager } from './Storage';
 import appdata from './appdata.json';
@@ -52,6 +53,7 @@ loader.register(new NetworkMonitor());
 loader.register(new StoreFilter(database, uuidMap));
 loader.register(new Ratings(database, uuidMap));
 loader.register(new AllowWindowedMode());
+// loader.register(new Record());
 loader.register(new PasteFromClipboard());
 
 window.addEventListener('load', () => {
