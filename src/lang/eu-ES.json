@@ -38,6 +38,13 @@
             "fullscreen": "Pantaila osoa"
         }
     },
+    "record": {
+        "name": "Record",
+        "button-label": {
+            "record": "Record",
+            "stop-recording": "Stop Recording"
+        }
+    },
     "clock": {
         "name": "Erlojua"
     },

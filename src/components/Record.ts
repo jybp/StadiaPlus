@@ -39,8 +39,8 @@ export class Record extends Component {
      * @memberof Record
      */
     startRecording(): void {
-        this.recording = true;
         // TODO
+        this.recording = true;
         Logger.info('start recording');
     }
 
@@ -50,8 +50,8 @@ export class Record extends Component {
      * @memberof Record
      */
     stopRecording(download: boolean): void {
-        this.recording = false;
         // TODO
+        this.recording = false;
         Logger.info('stop recording', download);
     }
 
@@ -71,7 +71,7 @@ export class Record extends Component {
         // TODO Setup label translations
         this.button = new UIButton(
             icon,
-            Language.get('allow-windowed-mode.button-label.windowed'),
+            Language.get('record.button-label.record'),
             this.id
         );
     }
@@ -101,12 +101,12 @@ export class Record extends Component {
         if (this.recording) {
             this.button.setIcon(icon_exit);
             this.button.setTitle(
-                Language.get('allow-windowed-mode.button-label.fullscreen')
+                Language.get('record.button-label.stop-recording')
             );
         } else {
             this.button.setIcon(icon);
             this.button.setTitle(
-                Language.get('allow-windowed-mode.button-label.windowed')
+                Language.get('record.button-label.record')
             );
         }
     }
@@ -135,9 +135,9 @@ export class Record extends Component {
                     if (!this.eventsAdded) {
                         self.button.onPressed(() => {
                             if (self.recording) {
-                                self.startRecording();
-                            } else {
                                 self.stopRecording(true);
+                            } else {
+                                self.startRecording();
                             }
                             self.updateButton();
                         });

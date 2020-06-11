@@ -38,6 +38,13 @@
             "fullscreen": "Fullskärm"
         }
     },
+    "record": {
+        "name": "Record",
+        "button-label": {
+            "record": "Record",
+            "stop-recording": "Stop Recording"
+        }
+    },
     "clock": {
         "name": "Klocka"
     },

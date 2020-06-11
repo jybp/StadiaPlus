@@ -53,7 +53,7 @@ loader.register(new NetworkMonitor());
 loader.register(new StoreFilter(database, uuidMap));
 loader.register(new Ratings(database, uuidMap));
 loader.register(new AllowWindowedMode());
-// loader.register(new Record());
+loader.register(new Record());
 loader.register(new PasteFromClipboard());
 
 window.addEventListener('load', () => {
