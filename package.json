@@ -41,6 +41,7 @@
         "webpack-cli": "^3.3.11"
     },
     "dependencies": {
+        "@types/dom-mediacapture-record": "^1.0.6",
         "bootstrap-vue": "^2.11.0",
         "css-loader": "^3.4.2",
         "deepmerge": "^4.2.2",

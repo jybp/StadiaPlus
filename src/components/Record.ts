@@ -3,6 +3,9 @@ import Logger from '../Logger';
 import { Language } from '../Language';
 import { UIButton } from '../ui/UIButton';
 import Util from '../Util';
+// Import the Recorder runnable as a raw string
+// @ts-ignore
+import runnable from '!raw-loader!../Recorder';
 
 const { chrome } = window as any;
 
@@ -34,28 +37,6 @@ export class Record extends Component {
     }
 
     /**
-     * Start recording.
-     *
-     * @memberof Record
-     */
-    startRecording(): void {
-        // TODO
-        this.recording = true;
-        Logger.info('start recording');
-    }
-
-    /**
-     * Stop recording.
-     * 
-     * @memberof Record
-     */
-    stopRecording(download: boolean): void {
-        // TODO
-        this.recording = false;
-        Logger.info('stop recording', download);
-    }
-
-    /**
      * Called on startup, initializes important variables.
      * 
      * @memberof Record
@@ -65,10 +46,10 @@ export class Record extends Component {
             Language.get('component.enabled', { name: this.name })
         );
         this.active = true;
+        Util.desandbox(runnable);
 
         // TODO Change icons
         const icon = chrome.runtime.getURL('images/icons/windowed.svg');
-        // TODO Setup label translations
         this.button = new UIButton(
             icon,
             Language.get('record.button-label.record'),
@@ -79,11 +60,18 @@ export class Record extends Component {
     /**
      * Called on stop, makes sure to dispose of elements and variables.
      * 
-     * @memberof Record
+     * @memberof NetworkMonitor
      */
     onStop(): void {
-        this.stopRecording(false);
         this.active = false;
+        this.button.element.remove();
+        this.button.destroy();
+
+        this.recording = false;
+        Util.desandbox('StadiaPlusRecorder.stop(false)');
+        Util.desandbox('StadiaPlusRecorder = null');
+
+        Logger.component(Language.get('component.disabled', { name: this.name }));
     }
 
     /**
@@ -135,9 +123,11 @@ export class Record extends Component {
                     if (!this.eventsAdded) {
                         self.button.onPressed(() => {
                             if (self.recording) {
-                                self.stopRecording(true);
+                                Util.desandbox('StadiaPlusRecorder.stop(true)');
+                                this.recording = false;
                             } else {
-                                self.startRecording();
+                                Util.desandbox('StadiaPlusRecorder.start()');
+                                this.recording = true;
                             }
                             self.updateButton();
                         });
