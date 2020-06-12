@@ -6,6 +6,8 @@ import Util from '../Util';
 
 const { chrome } = window as any;
 
+let recordBlobs: Blob[];
+
 /**
  * A button allowing the user to record the session locally.
  *
@@ -28,6 +30,8 @@ export class Record extends Component {
      * Whether recording mode is on or not.
      */
     recording: boolean = false;
+    mediaRecorder: MediaRecorder;
+    mediaRecorderOptions: MediaRecorderOptions;
 
     constructor() {
         super();
@@ -39,9 +43,31 @@ export class Record extends Component {
      * @memberof Record
      */
     startRecording(): void {
-        // TODO
+        const videoElements = document.getElementsByTagName('video');
+        if (videoElements.length == 0) {
+            return
+        }
+        const videoElement: any = videoElements[0];
+        Logger.info(this.mediaRecorderOptions.mimeType);
+        try {
+            this.mediaRecorder = new MediaRecorder(videoElement.captureStream(), this.mediaRecorderOptions);
+        } catch (e) {
+            Logger.error('record: ', e);
+            return;
+        }
+        this.mediaRecorder.ondataavailable = this.onMediaRecorderDataAvailable;
+        this.mediaRecorder.start();
         this.recording = true;
-        Logger.info('start recording');
+    }
+
+    onMediaRecorderDataAvailable(event: BlobEvent) {
+        if (recordBlobs == null) {
+            recordBlobs = [];
+        }
+
+        if (event.data && event.data.size > 0) {
+            recordBlobs.push(event.data);
+        }
     }
 
     /**
@@ -50,9 +76,38 @@ export class Record extends Component {
      * @memberof Record
      */
     stopRecording(download: boolean): void {
-        // TODO
-        this.recording = false;
-        Logger.info('stop recording', download);
+        if (this.mediaRecorder.state == 'inactive') {
+            this.mediaRecorder = null;
+            recordBlobs = [];
+            this.recording = false;
+            return;
+        }
+        // 'stop' triggers 'ondataavailable'.
+        this.mediaRecorder.stop();
+        // required so 'ondataavailable' runs to completion as well as 'stop'.
+        if (download) {
+            setTimeout(() => {
+                const blob = new Blob(recordBlobs, {type: 'video/webm'});
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'stadia.webm';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+                this.mediaRecorder = null;
+                recordBlobs = [];
+                this.recording = false;
+            }, 1000);
+        } else {
+            this.mediaRecorder = null;
+            recordBlobs = [];
+            this.recording = false;
+        }
     }
 
     /**
@@ -74,6 +129,14 @@ export class Record extends Component {
             Language.get('record.button-label.record'),
             this.id
         );
+
+        this.mediaRecorderOptions = {mimeType: 'video/webm;codecs=vp9,opus'};
+        if (!MediaRecorder.isTypeSupported(this.mediaRecorderOptions.mimeType)) {
+            this.mediaRecorderOptions.mimeType = 'video/webm';
+            if (!MediaRecorder.isTypeSupported(this.mediaRecorderOptions.mimeType)) {
+                this.mediaRecorderOptions.mimeType = '';
+            }
+        }
     }
 
     /**
