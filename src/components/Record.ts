@@ -43,14 +43,23 @@ export class Record extends Component {
      * @memberof Record
      */
     startRecording(): void {
-        const videoElements = document.getElementsByTagName('video');
-        if (videoElements.length == 0) {
+        if (this.mediaRecorderOptions.mimeType == '') {
+            Logger.warning('No video/webm recording option available');
             return
         }
-        const videoElement: any = videoElements[0];
-        Logger.info(this.mediaRecorderOptions.mimeType);
+        const videoElements = document.getElementsByTagName('video');
+        let stadiaVideoElement: any = null;
+        for (let i = 0; i < videoElements.length; i++) {
+            if (videoElements[i].src.length == 0) {
+                stadiaVideoElement = videoElements[i]
+            }
+        }
+        if (stadiaVideoElement == null) {
+            Logger.warning('Stadia video element not found');
+            return
+        }
         try {
-            this.mediaRecorder = new MediaRecorder(videoElement.captureStream(), this.mediaRecorderOptions);
+            this.mediaRecorder = new MediaRecorder(stadiaVideoElement.captureStream(), this.mediaRecorderOptions);
         } catch (e) {
             Logger.error('record: ', e);
             return;
@@ -86,6 +95,7 @@ export class Record extends Component {
         this.mediaRecorder.stop();
         // required so 'ondataavailable' runs to completion as well as 'stop'.
         if (download) {
+            var self = this;
             setTimeout(() => {
                 const blob = new Blob(recordBlobs, {type: 'video/webm'});
                 const url = window.URL.createObjectURL(blob);
@@ -94,14 +104,14 @@ export class Record extends Component {
                 a.href = url;
                 a.download = 'stadia.webm';
                 document.body.appendChild(a);
+                self.mediaRecorder = null;
+                recordBlobs = [];
+                self.recording = false;
                 a.click();
                 setTimeout(() => {
                     document.body.removeChild(a);
                     window.URL.revokeObjectURL(url);
                 }, 100);
-                this.mediaRecorder = null;
-                recordBlobs = [];
-                this.recording = false;
             }, 1000);
         } else {
             this.mediaRecorder = null;
