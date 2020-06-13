@@ -59,7 +59,7 @@ export class Record extends Component {
             return
         }
         try {
-            this.mediaRecorder = new MediaRecorder(stadiaVideoElement.captureStream(), this.mediaRecorderOptions);
+            this.mediaRecorder = new MediaRecorder(stadiaVideoElement.captureStream(30), this.mediaRecorderOptions);
         } catch (e) {
             Logger.error('record: ', e);
             return;
